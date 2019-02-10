@@ -75,11 +75,39 @@ def basic_als_recommender(filename, seed):
     - coldStartStrategy: 'drop'
     Test file: tests/test_basic_als.py
     '''
-    return 0
+    spark=init_spark()
+    lines = spark.read.text(filename).rdd
+    parts = lines.map(lambda row: row.value.split("::"))
+
+    ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
+                                     rating=float(p[2]), timestamp=long(p[3])))
+    ratings =spark.createDataFrame(ratingsRDD)
+    '''.toDF("age")'''
+    '''spark.createDataFrame(lines).collect()'''
+    '''print("op:{0}".format(ratings))
+    for line in ratings:
+        print("part:{0}".format(line))'''
+    (training, test) = ratings.randomSplit([0.8, 0.2])
+
+    # Build the recommendation model using ALS on the training data
+    # Note we set cold start strategy to 'drop' to ensure we don't get NaN evaluation metrics
+    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,coldStartStrategy="drop")
+    als.setSeed(seed)
+    '''userCol="userId", itemCol="movieId", ratingCol="rating",'''
+    model = als.fit(training)
+
+    # Evaluate the model by computing the RMSE on the test data
+    predictions = model.transform(test)
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
+                                predictionCol="prediction")
+    rmse = evaluator.evaluate(predictions)
+    print("Root-mean-square error = " + str(rmse))
+    return rmse
+    '''return 0'''
 
 def global_average(filename, seed):
     '''
-    This function must print the global average rating for all users and
+    This function must print the global average rating for all users and[
     all movies in the training set. Training and test
     sets should be determined as before (e.g: as in function basic_als_recommender).
     Test file: tests/test_global_average.py
