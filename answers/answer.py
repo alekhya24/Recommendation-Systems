@@ -138,7 +138,7 @@ def global_average_recommender(filename, seed):
     ratings_with_global_average = ratings.withColumn("average", lit(global_avg))
     ratings_with_global_average.show()
     (trainingWithAverage, testWithAverage) = ratings_with_global_average.randomSplit([0.8, 0.2])
-    alsWithAverage = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", averageCol="average",coldStartStrategy="drop")
+    alsWithAverage = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="average",coldStartStrategy="drop")
     alsWithAverage.setSeed(seed)
     modelWithAverage = alsWithAverage.fit(trainingWithAverage)
     predictionsWithAverage = modelWithAverage.transform(testWithAverage)
