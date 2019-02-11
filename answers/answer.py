@@ -80,7 +80,7 @@ def basic_als_recommender(filename, seed):
     parts = lines.map(lambda row: row.value.split("::"))
     lines = spark.sparkContext.textFile(filename)
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
-                                     rating=float(p[2]), timestamp=long(p[3])))
+                                     rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
     '''for line in ratings:
         print("part:{0}".format(line))'''
