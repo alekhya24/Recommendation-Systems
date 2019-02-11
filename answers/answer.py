@@ -112,7 +112,7 @@ def global_average(filename, seed):
     predictions = model.transform(test)
     global_avg = predictions.agg({"rating": "avg"}).collect()
     print("Global_avg:{0}".format(global_avg[0]))
-    return global_avg[0]
+    return float(global_avg[0])
 
 def global_average_recommender(filename, seed):
     '''
