@@ -123,8 +123,22 @@ def global_average_recommender(filename, seed):
     sets should be determined as before. You can add a column to an existing DataFrame with function *.withColumn(...)*.
     Test file: tests/test_global_average_recommender.py
     '''
+    spark=init_spark()
+    lines = spark.read.text(filename).rdd
+    parts = lines.map(lambda row: row.value.split("::"))
+    ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
+                                     rating=float(p[2])))
+    ratings =spark.createDataFrame(ratingsRDD)
+    (training, test) = ratings.randomSplit([0.8, 0.2])
+    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    als.setSeed(seed)
+    model = als.fit(training)
+    predictions = model.transform(test)
+    global_avg = predictions.agg({"rating": "avg"}).collect()[0][0]
+    ratings_with_global_average = df.withColumn("global_average", global_avg)
+    ratings_with_global_average.show()
     return 0
-
+        
 def means_and_interaction(filename, seed, n):
     '''
     This function must return the *n* first elements of a DataFrame
