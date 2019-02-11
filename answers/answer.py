@@ -187,8 +187,10 @@ def means_and_interaction(filename, seed, n):
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
-    user_mean = training.groupBy("userId").agg(F.avg("rating")).collect()
-    print("user_mean:{0}".format(user_mean))
+    each_user_mean = training.groupBy("userId").agg({"rating":"avg"}).collect()
+    all_user_mean=each_user_mean.agg({"rating":"avg"}).collect()
+    print("each_user_mean:{0}".format(each_user_mean))
+    print("all_user_mean:{0}".format(all_user_mean))
     return []
 
 def als_with_bias_recommender(filename, seed):
