@@ -135,7 +135,7 @@ def global_average_recommender(filename, seed):
     model = als.fit(training)
     predictions = model.transform(test)
     global_avg = predictions.agg({"rating": "avg"}).collect()[0][0]
-    ratings_with_global_average = ratings.withColumn("global_average", global_avg)
+    ratings_with_global_average = ratings.withColumn("average", global_avg)
     ratings_with_global_average.show()
     return 0
         
