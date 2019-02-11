@@ -180,13 +180,13 @@ def means_and_interaction(filename, seed, n):
     
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
-    als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     model= als.fit(training)
     predictions = model.transform(test)
-    '''evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
+    evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
-    user_mean = predictions.groupBy("userId").agg({"rating":"avg"}).collect()[0][0]
+    user_mean = training.groupBy("userId").agg({"rating":"avg"}).collect()[0][0]
     print("user_mean:{0}".format(user_mean))
     return []
 
