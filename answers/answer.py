@@ -137,7 +137,16 @@ def global_average_recommender(filename, seed):
     global_avg = predictions.agg({"rating": "avg"}).collect()[0][0]
     ratings_with_global_average = ratings.withColumn("average", lit(global_avg))
     ratings_with_global_average.show()
-    return 0
+    (trainingWithAverage, testWithAverage) = ratings_with_global_average.randomSplit([0.8, 0.2])
+    alsWithAverage = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", averageCol="average",coldStartStrategy="drop")
+    alsWithAverage.setSeed(seed)
+    modelWithAverage = alsWithAverage.fit(trainingWithAverage)
+    predictionsWithAverage = modelWithAverage.transform(testWithAverage)
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="average",
+                                predictionCol="prediction")
+    rmse = evaluator.evaluate(predictions)
+    print("RMSE:{0}".format(rmse))
+    return rmse
         
 def means_and_interaction(filename, seed, n):
     '''
