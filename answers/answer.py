@@ -89,6 +89,7 @@ def basic_als_recommender(filename, seed):
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
+    print("RMSE:{0}".format(rmse))
     return rmse
 
 def global_average(filename, seed):
@@ -109,7 +110,7 @@ def global_average(filename, seed):
     als.setSeed(seed)
     model = als.fit(training)
     predictions = model.transform(test)
-    global_avg = predictions.agg({"rating": "avg"})
+    global_avg = predictions.agg({"rating": "avg"}).collect()
     print("Global_avg:{0}".format(global_avg))
     return global_avg
 
