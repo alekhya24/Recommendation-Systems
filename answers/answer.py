@@ -172,6 +172,22 @@ def means_and_interaction(filename, seed, n):
     Note, this function should return a list of collected Rows. Please, have a
     look at the test file to ensure you have the right format.
     '''
+    spark=init_spark()
+    lines = spark.read.text(filename).rdd
+    parts = lines.map(lambda row: row.value.split("::"))
+    ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
+                                     rating=float(p[2])))
+    ratingsGroupByUserId=ratingsRDD.groupBy(lambda r:r[0])
+    ratings =spark.createDataFrame(ratingsGroupByUserId)
+    (training, test) = ratings.randomSplit([0.8, 0.2])
+    alsForUserMean = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", ratingCol="rating",coldStartStrategy="drop")
+    alsForUserMean.setSeed(seed)
+    modelForUserMean = alsForUserMean.fit(training)
+    predictionsForUserMean = modelForUserMean.transform(test)
+    evaluatorForUserMean = RegressionEvaluator(metricName="mean", labelCol="rating",
+                                predictionCol="prediction")
+    user_mean = evaluatorForUserMean.evaluate(predictionsForUserMean)
+    print("user_mean:{0}".format(user_mean))
     return []
 
 def als_with_bias_recommender(filename, seed):
