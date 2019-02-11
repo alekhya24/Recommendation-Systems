@@ -111,8 +111,8 @@ def global_average(filename, seed):
     model = als.fit(training)
     predictions = model.transform(test)
     global_avg = predictions.agg({"rating": "avg"}).collect()
-    print("Global_avg:{0}".format(global_avg))
-    return global_avg
+    print("Global_avg:{0}".format(global_avg[0]))
+    return global_avg[0]
 
 def global_average_recommender(filename, seed):
     '''
