@@ -82,21 +82,14 @@ def basic_als_recommender(filename, seed):
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
-
-    # Build the recommendation model using ALS on the training data
-    # Note we set cold start strategy to 'drop' to ensure we don't get NaN evaluation metrics
     als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     model = als.fit(training)
-
-    # Evaluate the model by computing the RMSE on the test data
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
-    print("Root-mean-square error = " + str(rmse))
     return rmse
-    '''return 0'''
 
 def global_average(filename, seed):
     '''
@@ -105,7 +98,20 @@ def global_average(filename, seed):
     sets should be determined as before (e.g: as in function basic_als_recommender).
     Test file: tests/test_global_average.py
     '''
-    return 0
+    spark=init_spark()
+    lines = spark.read.text(filename).rdd
+    parts = lines.map(lambda row: row.value.split("::"))
+    ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
+                                     rating=float(p[2])))
+    ratings =spark.createDataFrame(ratingsRDD)
+    (training, test) = ratings.randomSplit([0.8, 0.2])
+    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    als.setSeed(seed)
+    model = als.fit(training)
+    predictions = model.transform(test)
+    global_avg = predictions.agg({"rating": "avg"})
+    print("Global_avg:{0}".format(global_avg))
+    return global_avg
 
 def global_average_recommender(filename, seed):
     '''
