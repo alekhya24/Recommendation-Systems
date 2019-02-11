@@ -144,7 +144,7 @@ def global_average_recommender(filename, seed):
     predictionsWithAverage = modelWithAverage.transform(testWithAverage)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="average",
                                 predictionCol="prediction")
-    rmse = evaluator.evaluate(predictions)
+    rmse = evaluator.evaluate(predictionsWithAverage)
     print("RMSE:{0}".format(rmse))
     return rmse
         
