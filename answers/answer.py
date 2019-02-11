@@ -187,7 +187,8 @@ def means_and_interaction(filename, seed, n):
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
-    user_mean = training.groupBy("userId").agg(F.avg("rating")).collect()[0][0]
+    user_mean = training.groupBy("userId").agg(F.avg("rating")).collect()
+    user_mean.show()
     print("user_mean:{0}".format(user_mean))
     return []
 
