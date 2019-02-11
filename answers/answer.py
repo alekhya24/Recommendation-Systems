@@ -78,12 +78,9 @@ def basic_als_recommender(filename, seed):
     spark=init_spark()
     lines = spark.read.text(filename).rdd
     parts = lines.map(lambda row: row.value.split("::"))
-    lines = spark.sparkContext.textFile(filename)
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
-    '''for line in ratings:
-        print("part:{0}".format(line))'''
     (training, test) = ratings.randomSplit([0.8, 0.2])
 
     # Build the recommendation model using ALS on the training data
