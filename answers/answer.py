@@ -177,16 +177,16 @@ def means_and_interaction(filename, seed, n):
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
-    ratingsGroupByUserId=ratingsRDD.groupBy(lambda r:r[0])
-    ratings =spark.createDataFrame(ratingsGroupByUserId)
+    
+    ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
-    alsForUserMean = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed, itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    alsForUserMean.setSeed(seed)
-    modelForUserMean = alsForUserMean.fit(training)
-    predictionsForUserMean = modelForUserMean.transform(test)
-    evaluatorForUserMean = RegressionEvaluator(metricName="mean", labelCol="rating",
-                                predictionCol="prediction")
-    user_mean = evaluatorForUserMean.evaluate(predictionsForUserMean)
+    als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    als.setSeed(seed)
+    model= als.fit(training)
+    predictions = model.transform(test)
+    '''evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
+                                predictionCol="prediction")'''
+    user_mean = predictions.groupBy("userId").agg({"rating":"avg"}).collect()[0][0]
     print("user_mean:{0}".format(user_mean))
     return []
 
