@@ -85,9 +85,8 @@ def basic_als_recommender(filename, seed):
 
     # Build the recommendation model using ALS on the training data
     # Note we set cold start strategy to 'drop' to ensure we don't get NaN evaluation metrics
-    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,coldStartStrategy="drop")
+    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    '''userCol="userId", itemCol="movieId", ratingCol="rating",'''
     model = als.fit(training)
 
     # Evaluate the model by computing the RMSE on the test data
