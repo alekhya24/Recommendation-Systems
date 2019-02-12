@@ -217,11 +217,11 @@ def means_and_interaction(filename, seed, n):
     return []
 
 def createCombiner(tpl):
-    print("tp1:{0}{1}".format(tp1[0],tp1[1]))
+    print("opp:{0}{1}".format(tp1[0],tp1[1]))
     return (tpl[1], 1)
     
 def mergeValue(accumulator, element):
-    print(accumulator + element)
+    print("accmu:{0}"accumulator + element)
     return (accumulator[0] + element[1], accumulator[1] + 1)
     
 def mergeCombiner(accumulator1, accumulator2): 
