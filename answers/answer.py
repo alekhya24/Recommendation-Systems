@@ -187,7 +187,7 @@ def means_and_interaction(filename, seed, n):
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
  
-    comb_rdd = ratingsRDD.map(lambda t: (t[0], t[2])) \
+    comb_rdd = ratingsRDD.map(lambda t: (t[2], t[1])) \
                     .combineByKey(createCombiner, mergeValue, mergeCombiner) \
                     .map(lambda t: (t[0], t[1][0]/t[1][1]))
  
