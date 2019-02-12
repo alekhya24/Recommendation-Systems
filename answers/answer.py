@@ -195,7 +195,7 @@ def means_and_interaction(filename, seed, n):
     print("each_user_mean:{0}".format(each_user_mean))'''
     '''user_rating = training.select(userId, rating)'''
     user_rating = ratingsRDD.map(lambda userId,movieId,rating: (userId, rating))
-    user_sumRating_numRating = training.combineByKey(
+    user_sumRating_numRating = user_rating.combineByKey(
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
     # add a new rating to the tallies
