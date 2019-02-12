@@ -203,7 +203,7 @@ def means_and_interaction(filename, seed, n):
     # combine tallies
     mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     # use map() to calculate mean rating of each user
-    averageByKey = user_sumRating_numRating.map(lambda y: (y[0]/y[1]))
+    averageByKey = user_sumRating_numRating.map(lambda x,y: x,(y[0]/y[1]))
     op = averageByKey.collectAsMap()
     '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
