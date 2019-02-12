@@ -194,7 +194,7 @@ def means_and_interaction(filename, seed, n):
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
     '''user_rating = training.select(userId, rating)'''
-    user_rating = ratingsRDD.map(lambda x: (x[0], x[2]))
+    user_rating = rdd.map(lambda user_id_movie_id_rating: (user_id_movie_id_rating[0], user_id_movie_id_rating[2]))
     user_sumRating_numRating = user_rating.combineByKey(
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
@@ -203,7 +203,8 @@ def means_and_interaction(filename, seed, n):
     # combine tallies
     mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     # use map() to calculate mean rating of each user
-    averageByKey = user_sumRating_numRating.map(lambda op1,op: op1,op[0]/op[1])
+    averageByKey = user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating_num_rating: \
+    sum_rating_num_rating[0] / sum_rating_num_rating[1])
     opp = averageByKey.collectAsMap()
     '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
