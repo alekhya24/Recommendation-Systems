@@ -190,7 +190,7 @@ def means_and_interaction(filename, seed, n):
     '''each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
-    user_rating = rdd.map(lambda (useId, movieId, rating): (user_id, rating))
+    user_rating = training.map(lambda (userId, movieId, rating): (user_id, rating))
     user_sumRating_numRating = user_rating.combineByKey(
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
