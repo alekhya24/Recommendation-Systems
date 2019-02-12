@@ -199,15 +199,15 @@ def means_and_interaction(filename, seed, n):
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
     # add a new rating to the tallies
-    mergeValue=lambda sum_rating, num_rating, new_rating: (sum_rating + new_rating, num_rating + 1),
+    mergeValue=lambda ((sum_rating, num_rating), new_rating): (sum_rating + new_rating, num_rating + 1),
     # combine tallies
-    mergeCombiners=lambda sum_rating_1, num_rating_1, sum_rating_2, num_rating_2:
+    mergeCombiners=lambda ((sum_rating_1, num_rating_1), (sum_rating_2, num_rating_2)):
         (sum_rating_1 + sum_rating_2, num_rating_1 + num_rating_2))
     # use map() to calculate mean rating of each user
-    user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
-    sum_rating / num_rating)
-    op = user_meanRating.collect()
-    print("all_user_mean:{0}".format(op))
+    user_meanRating = user_sumRating_numRating.mapValues(lambda (sum_rating, num_rating):
+    (sum_rating / num_rating))
+    print user_meanRating.collectAsMap()
+    '''print("all_user_mean:{0}".format(op))'''
     return []
 
 def als_with_bias_recommender(filename, seed):
