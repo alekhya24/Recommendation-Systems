@@ -200,7 +200,7 @@ def createCombiner(tpl):
     return (tpl, 1)
     
 def mergeValue(accumulator, element):
-    return (accumulator[0] + element[1], accumulator[1] + 1)
+    return (accumulator[0] + element, accumulator[1] + 1)
     
 def mergeCombiner(accumulator1, accumulator2): 
     return (accumulator1[0] + accumulator2[0], accumulator1[1] + accumulator2[1])
