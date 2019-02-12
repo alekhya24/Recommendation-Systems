@@ -204,11 +204,11 @@ def means_and_interaction(filename, seed, n):
     mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     # use map() to calculate mean rating of each user
     averageByKey = user_sumRating_numRating.map(lambda op1,op: op1,op[0]/op[1])
-    op = averageByKey.collectAsMap()
+    opp = averageByKey.collectAsMap()
     '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
     op = user_meanRating.collect()'''
-    print("all_user_mean:{0}".format(op))
+    print("all_user_mean:{0}".format(opp))
     return []
 
 def als_with_bias_recommender(filename, seed):
