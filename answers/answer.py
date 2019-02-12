@@ -178,6 +178,10 @@ def means_and_interaction(filename, seed, n):
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
+    '''userRatingsRDD = parts.map(lambda p: Row(userId=int(p[0]),
+                                     rating=float(p[2])))
+    itemRatingsRDD = parts.map(lambda p: Row(movieId=int(p[1]),
+                                     rating=float(p[2])))'''
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
@@ -186,24 +190,11 @@ def means_and_interaction(filename, seed, n):
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
+    each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
+    '''all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()'''
+    print("each_user_mean:{0}".format(each_user_mean))
  
-    comb_rdd = ratingsRDD.map(lambda t: (t[2], t[1])) \
-                    .combineByKey(createCombiner, mergeValue, mergeCombiner) \
-                    .map(lambda t: (t[0], t[1][0]/t[1][1]))
- 
-    # Check the Outout
-    for tpl in comb_rdd.collect():
-        print(tpl)
-    return []
-
-def createCombiner(tpl):
-    return (tpl, 1)
-    
-def mergeValue(accumulator, element):
-    return (accumulator[0] + element, accumulator[1] + 1)
-    
-def mergeCombiner(accumulator1, accumulator2): 
-    return (accumulator1[0] + accumulator2[0], accumulator1[1] + accumulator2[1])
+    return [];   
 
 def als_with_bias_recommender(filename, seed):
     '''
