@@ -194,19 +194,36 @@ def means_and_interaction(filename, seed, n):
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
     '''user_rating = training.select(userId, rating)'''
-    user_rating = ratingsRDD.map(lambda user_id_movie_id_rating: (user_id_movie_id_rating[1], user_id_movie_id_rating[2]))
+    '''user_rating = ratingsRDD.map(lambda user_id_movie_id_rating: (user_id_movie_id_rating[1], user_id_movie_id_rating[2]))
     user_sumRating_numRating = user_rating.combineByKey(
     createCombiner=lambda first_rating: (first_rating, 1),
     mergeValue=lambda sum_rating_num_rating, new_rating: (sum_rating_num_rating[0] + new_rating, sum_rating_num_rating[1] + 1),
     mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating_num_rating: \
     sum_rating_num_rating[0] / sum_rating_num_rating[1])
-    opp = user_meanRating.take(5)
+    opp = user_meanRating.take(5)'''
+ 
+    comb_rdd = ratingsRDD.map(lambda t: (t[0], (t[1], t[2]))) \
+                    .combineByKey(createCombiner, mergeValue, mergeCombiner) \
+                    .map(lambda t: (t[0], t[1][0]/t[1][1]))
+ 
+    # Check the Outout
+    for tpl in comb_rdd.collect():
+    print(tpl)
     '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
     op = user_meanRating.collect()'''
-    print("all_user_mean:{0}".format(opp))
+    '''print("all_user_mean:{0}".format(opp))'''
     return []
+
+def createCombiner(tpl):
+    return (tpl[1], 1)
+    
+def mergeValue(accumulator, element): 
+    return (accumulator[0] + element[1], accumulator[1] + 1)
+    
+def mergeCombiner(accumulator1, accumulator2): 
+    return (accumulator1[0] + accumulator2[0], accumulator1[1] + accumulator2[1])
 
 def als_with_bias_recommender(filename, seed):
     '''
