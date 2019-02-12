@@ -174,7 +174,7 @@ def means_and_interaction(filename, seed, n):
     look at the test file to ensure you have the right format.
     '''
     spark=init_spark()
-    lines = spark.read.text(filename).rdd.take(n)
+    lines = spark.read.text(filename).rdd
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
@@ -187,10 +187,22 @@ def means_and_interaction(filename, seed, n):
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
-    each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
+    '''each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
-    print("each_user_mean:{0}".format(each_user_mean))
-    print("all_user_mean:{0}".format(all_user_mean))
+    print("each_user_mean:{0}".format(each_user_mean))'''
+    user_rating = rdd.map(lambda (user_id, movie_id, rating): (user_id, rating))
+    user_sumRating_numRating = user_rating.combineByKey(
+    # start with the first rating and set count to one​
+    createCombiner=lambda first_rating: (first_rating, 1),
+    # add a new rating to the tallies
+    mergeValue=lambda (sum_rating, num_rating), new_rating: (sum_rating + new_rating, num_rating + 1),
+    # combine tallies
+    mergeCombiners=lambda (sum_rating_1, num_rating_1), (sum_rating_2, num_rating_2):
+        (sum_rating_1 + sum_rating_2, num_rating_1 + num_rating_2)
+    # use map() to calculate mean rating of each user
+    user_meanRating = user_sumRating_numRating.mapValues(lambda (sum_rating, num_rating):
+    sum_rating / num_rating))
+    print("all_user_mean:{0}".format(user_meanRating))
     return []
 
 def als_with_bias_recommender(filename, seed):
