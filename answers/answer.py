@@ -189,7 +189,7 @@ def means_and_interaction(filename, seed, n):
     '''each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
-    user_rating = training.map(lambda (userId, movieId, rating): (userId, rating))
+    '''user_rating = training.map(lambda (userId, movieId, rating): (userId, rating))
     user_sumRating_numRating = user_rating.combineByKey(
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
@@ -201,7 +201,7 @@ def means_and_interaction(filename, seed, n):
     # use map() to calculate mean rating of each user
     user_meanRating = user_sumRating_numRating.mapValues(lambda (sum_rating, num_rating):
     sum_rating / num_rating))
-    print("all_user_mean:{0}".format(user_meanRating)
+    print("all_user_mean:{0}".format(user_meanRating)'''
     return []
 
 def als_with_bias_recommender(filename, seed):
