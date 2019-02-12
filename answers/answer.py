@@ -174,12 +174,12 @@ def means_and_interaction(filename, seed, n):
     look at the test file to ensure you have the right format.
     '''
     spark=init_spark()
-    lines = spark.read.text(filename).rdd
+    lines = spark.read.text(filename).rdd.take(n)
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
-    
-    ratings =spark.createDataFrame(ratingsRDD).take(n)
+    ratingsRDD=rating
+    ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
