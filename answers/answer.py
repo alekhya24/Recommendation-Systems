@@ -209,7 +209,7 @@ def means_and_interaction(filename, seed, n):
  
     # Check the Outout
     for tpl in comb_rdd.collect():
-    print(tpl)
+        print(tpl)
     '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
     op = user_meanRating.collect()'''
