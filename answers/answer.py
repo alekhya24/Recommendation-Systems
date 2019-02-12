@@ -178,11 +178,11 @@ def means_and_interaction(filename, seed, n):
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
-    userRatingsRDD = parts.map(lambda p: Row(userId=int(p[0]),
+    '''userRatingsRDD = parts.map(lambda p: Row(userId=int(p[0]),
                                      rating=float(p[2])))
     itemRatingsRDD = parts.map(lambda p: Row(movieId=int(p[1]),
-                                     rating=float(p[2])))
-    ratings =spark.createDataFrame(userRatingsRDD)
+                                     rating=float(p[2])))'''
+    ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
@@ -194,15 +194,15 @@ def means_and_interaction(filename, seed, n):
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
     '''user_rating = training.select(userId, rating)'''
-    '''user_rating = ratingsRDD.map(lambda row: (userId, rating))'''
+    user_rating = ratingsRDD.map(lambda userId,movieId,rating: (userId, rating))
     user_sumRating_numRating = training.combineByKey(
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
     # add a new rating to the tallies
-    mergeValue=lambda (sum_rating, num_rating), new_rating: (sum_rating + new_rating, num_rating + 1),
+    mergeValue=lambda sum_rating, num_rating, new_rating: (sum_rating + new_rating, num_rating + 1),
     # combine tallies
-    mergeCombiners=lambda (sum_rating_1, num_rating_1), (sum_rating_2, num_rating_2):
-        (sum_rating_1 + sum_rating_2, num_rating_1 + num_rating_2)
+    mergeCombiners=lambda sum_rating_1, num_rating_1, sum_rating_2, num_rating_2:
+        (sum_rating_1 + sum_rating_2, num_rating_1 + num_rating_2))
     # use map() to calculate mean rating of each user
     user_meanRating = user_sumRating_numRating.mapValues(lambda (sum_rating, num_rating):
     sum_rating / num_rating))
