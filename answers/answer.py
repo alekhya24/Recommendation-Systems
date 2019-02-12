@@ -217,7 +217,7 @@ def means_and_interaction(filename, seed, n):
     return []
 
 def createCombiner(tpl):
-    print("tp1:{0}{1}".format(tp1,tp1[1]))
+    print("tp1:{0}{1}".format(tp1[0],tp1[1]))
     return (tpl[1], 1)
     
 def mergeValue(accumulator, element):
