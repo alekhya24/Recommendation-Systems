@@ -199,7 +199,7 @@ def means_and_interaction(filename, seed, n):
     # start with the first rating and set count to one​
     createCombiner=lambda first_rating: (first_rating, 1),
     # add a new rating to the tallies
-    mergeValue=lambda x, new_rating: (x[0] + new_rating, x[1] + 1),
+    mergeValue=lambda acc, new_rating: (acc[0] + new_rating, acc[1] + 1),
     # combine tallies
     mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     # use map() to calculate mean rating of each user
