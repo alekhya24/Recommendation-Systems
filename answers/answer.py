@@ -206,7 +206,10 @@ def means_and_interaction(filename, seed, n):
     # use map() to calculate mean rating of each user
     user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     sum_rating / num_rating)
-    print("all_user_mean:{0}".format(user_meanRating))
+    user_meanRatingDF=spark.createDataFrame(user_meanRating)
+    print("mean:{0}".format(user_meanRatingDF))
+    for v in user_meanRating:
+    print("all_user_mean:{0}".format(v))
     return []
 
 def als_with_bias_recommender(filename, seed):
