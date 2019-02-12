@@ -194,15 +194,20 @@ def means_and_interaction(filename, seed, n):
     all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()
     print("each_user_mean:{0}".format(each_user_mean))'''
     '''user_rating = training.select(userId, rating)'''
-    user_rating = ratingsRDD.map(lambda x: (x[0], x[2]))
+    user_rating = ratingsRDD.map(lambda x: (x[0], x[1]))
     user_sumRating_numRating = user_rating.combineByKey(
-    (first_rating)=> (first_rating, 1),
-    (acc: (float,int), new_rating)=>(acc._1 + new_rating, acc._2 + 1),
-    ( acc1:(float,int),acc2 :(float,int))=>(acc1._1 + acc2._1, acc1._2 + acc2._2))
+    # start with the first rating and set count to one​
+    createCombiner=lambda first_rating: (first_rating, 1),
+    # add a new rating to the tallies
+    mergeValue=lambda x, new_rating: (x[0] + new_rating, x[1] + 1),
+    # combine tallies
+    mergeCombiners=lambda x, y:(x[0] + y[0], x[1] + y[1]))
     # use map() to calculate mean rating of each user
-    user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
+    averageByKey = user_sumRating_numRating.map(lambda (key, (totalSum, count)): (key, totalSum / count))
+    op = averageByKey.collectAsMap()
+    '''user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
     (sum_rating / num_rating))
-    op = user_meanRating.collect()
+    op = user_meanRating.collect()'''
     print("all_user_mean:{0}".format(op))
     return []
 
