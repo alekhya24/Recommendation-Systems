@@ -5,10 +5,10 @@ from pyspark.sql import Row
 from pyspark.sql import DataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
-from pyspark.sql.functions import bround
 from pyspark.sql.functions import desc
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.recommendation import ALS
+from pyspark.sql import functions as F
 '''os.environ['HADOOP_HOME'] = "C:\\winutils"'''
 
 '''
@@ -111,8 +111,8 @@ def global_average(filename, seed):
     als.setSeed(seed)
     model = als.fit(training)
     predictions = model.transform(test)'''
-    global_avg = training.agg(bround(avg(training.rating))).collect()[0][0]
-    print("Global_avg:{0}".format(float(global_avg)))
+    global_avg = training.agg({"rating": "mean"}).collect()[0][0]
+    print("Global_avg:{0}".format(global_avg))
     return float(global_avg)
 
 def global_average_recommender(filename, seed):
@@ -179,7 +179,7 @@ def means_and_interaction(filename, seed, n):
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
     
-    ratings =spark.createDataFrame(ratingsRDD)
+    ratings =spark.createDataFrame(ratingsRDD).take(n)
     (training, test) = ratings.randomSplit([0.8, 0.2])
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
