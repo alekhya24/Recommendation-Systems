@@ -205,7 +205,7 @@ def means_and_interaction(filename, seed, n):
         (sum_rating_1 + sum_rating_2, num_rating_1 + num_rating_2))
     # use map() to calculate mean rating of each user
     user_meanRating = user_sumRating_numRating.mapValues(lambda sum_rating, num_rating:
-    sum_rating / num_rating))
+    sum_rating / num_rating)
     print("all_user_mean:{0}".format(user_meanRating)
     return []
 
