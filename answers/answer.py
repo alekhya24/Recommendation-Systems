@@ -221,7 +221,7 @@ def createCombiner(tpl):
     return (tpl[1], 1)
     
 def mergeValue(accumulator, element):
-    print("accmu:{0}"accumulator + element)
+    print("accmu:{0}{1}{2}".format(accumulator[0],accumulator[1],element[1])
     return (accumulator[0] + element[1], accumulator[1] + 1)
     
 def mergeCombiner(accumulator1, accumulator2): 
