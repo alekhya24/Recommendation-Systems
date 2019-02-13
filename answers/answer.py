@@ -215,9 +215,19 @@ def means_and_interaction(filename, seed, n):
         #Do whatever you want to the dict. Like adding a new field or etc.
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
         temp_df = spark.createDataFrame(l, schema)
+<<<<<<< HEAD
         final_df = final_df.union(temp_df)
     print("final:{0}".format(final_df.take(n)))
     return final_df.take(n);   
+=======
+        '''temp["user_mean"] = user_mean
+        temp["item_mean"] = item_mean
+        temp["user_item_interaction"] = user_item_interaction
+        output = Row(**temp)'''
+        final_df = final_df.union(temp_df)
+    print("final:{0}".format(final_df.collect()))
+    return final_df.collect();   
+>>>>>>> fedb5c26d22878487622a2334e3ef105a7a85d37
 
 def als_with_bias_recommender(filename, seed):
     '''
