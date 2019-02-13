@@ -10,7 +10,8 @@ from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.recommendation import ALS
 from pyspark.sql.types import StructField
 from pyspark.sql.types import StructType
-from pyspark.sql.types import StringType
+from pyspark.sql.types import IntegerType
+from pyspark.sql.types import FloatType
 from pyspark import SparkContext
 sc =SparkContext()
 '''os.environ['HADOOP_HOME'] = "C:\\winutils"'''
@@ -182,10 +183,6 @@ def means_and_interaction(filename, seed, n):
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
-    '''userRatingsRDD = parts.map(lambda p: Row(userId=int(p[0]),
-                                     rating=float(p[2])))
-    itemRatingsRDD = parts.map(lambda p: Row(movieId=int(p[1]),
-                                     rating=float(p[2])))'''
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2])
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
@@ -198,12 +195,12 @@ def means_and_interaction(filename, seed, n):
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     op_df=training.orderBy("userId","movieId")
-    schema=StructType([StructField('userId', StringType()),
-                                                         StructField('movieId', StringType()),
-                                                         StructField('rating', StringType()),
-                                                         StructField('user_mean', StringType()),
-                                                            StructField('item_mean', StringType()),
-                                                            StructField('user_item_interaction', StringType())])
+    schema=StructType([StructField('userId', IntegerType()),
+                                                         StructField('movieId', IntegerType()),
+                                                         StructField('rating', FloatType()),
+                                                         StructField('user_mean', FloatType()),
+                                                            StructField('item_mean', FloatType()),
+                                                            StructField('user_item_interaction', FloatType())])
     final_df = spark.createDataFrame(sc.emptyRDD(), schema)
     sorted_training_data =op_df.take(n)
     l = []
