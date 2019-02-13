@@ -193,18 +193,15 @@ def means_and_interaction(filename, seed, n):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    print("each_user_mean:{0}".format(each_user_mean))
-    print("each_item_mean:{0}".format(each_item_mean))
     op_df=training.orderBy("userId","movieId")
     sorted_training_data =op_df.take(n)
     for i in sorted_training_data:
-        print("adb:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
-        op_df.withColumn("user_mean", lit(user_mean))
-        op_df.withColumn("item_mean", lit(item_mean))
-        op_df.withColumn("user_item_interaction", lit(user_item_interaction))
+        op_df = op_df.withColumn("user_mean", lit(user_mean))
+        op_df = op_df.withColumn("item_mean", lit(item_mean))
+        op_df = op_df.withColumn("user_item_interaction", lit(user_item_interaction))
     print("final:{0}".format(op_df.take(n)))
     return op_df.take(n);   
 
