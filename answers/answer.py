@@ -217,8 +217,8 @@ def means_and_interaction(filename, seed, n):
         '''op_df = op_df.withColumn("user_mean", lit(user_mean))
         op_df = op_df.withColumn("item_mean", lit(item_mean))
         op_df = op_df.withColumn("user_item_interaction", lit(user_item_interaction))'''
-    print("final:{0}".format(final_df.take(n)))
-    return final_df.take(n);   
+    print("final:{0}".format(final_df))
+    return final_df.collect();   
 
 def als_with_bias_recommender(filename, seed):
     '''
