@@ -195,8 +195,8 @@ def means_and_interaction(filename, seed, n):
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     print("each_user_mean:{0}".format(each_user_mean))
     print("each_item_mean:{0}".format(each_item_mean))
-    sorted_training_data=training.orderBy("userId","movieId").take(n)
-    op_df = sorted_training_data
+    op_df=training.orderBy("userId","movieId")
+    sorted_training_data =op_df.take(n)
     for i in sorted_training_data:
         print("adb:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
@@ -205,8 +205,8 @@ def means_and_interaction(filename, seed, n):
         op_df.withColumn("user_mean", lit(user_mean))
         op_df.withColumn("item_mean", lit(item_mean))
         op_df.withColumn("user_item_interaction", lit(user_item_interaction))
-    print("final:{0}".format(op_df.collect()))
-    return op_df.collect();   
+    print("final:{0}".format(op_df.take(n)))
+    return op_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
     '''
