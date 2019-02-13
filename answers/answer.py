@@ -198,7 +198,7 @@ def means_and_interaction(filename, seed, n):
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     op_df=training.orderBy("userId","movieId")
-    final_df = spark.createDataFrame(sc.emptyRDD[Row], schema=StructType([StructField('userId', StringType()),
+    final_df = spark.createDataFrame(sc.emptyRDD(), schema=StructType([StructField('userId', StringType()),
                                                          StructField('movieId', StringType()),
                                                          StructField('rating', StringType()),
                                                          StructField('user_mean', StringType()),
