@@ -200,8 +200,8 @@ def means_and_interaction(filename, seed, n):
         print("adb:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
-        print("um : {0}".format(user_mean)
-        print("im:{0}".format(item_mean)
+        print("um : {0}".format(user_mean))
+        print("im:{0}".format(item_mean))
         user_item_interaction = user_mean+ item_mean - i.rating
  
     return [];   
