@@ -8,7 +8,7 @@ from pyspark.sql.functions import lit
 from pyspark.sql.functions import desc
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.recommendation import ALS
-from pyspark.sql import functions as F
+from pyspark.sql.functions import col
 '''os.environ['HADOOP_HOME'] = "C:\\winutils"'''
 
 '''
