@@ -191,8 +191,8 @@ def means_and_interaction(filename, seed, n):
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
-    each_user_mean = training.groupBy("userId").agg({"rating":"mean"}).collect()
-    each_item_mean = training.groupBy("movieId").agg({"rating":"mean"}).collect()
+    each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
+    each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     for i in training:
         print("adb:{0}".format(i))
         user_mean = each_user_mean.loc[each_user_mean['userId'] == i.select("userId")]
