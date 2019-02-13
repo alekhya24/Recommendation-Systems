@@ -195,16 +195,18 @@ def means_and_interaction(filename, seed, n):
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     print("each_user_mean:{0}".format(each_user_mean))
     print("each_item_mean:{0}".format(each_item_mean))
-    sorted_training_data=training.orderBy("userId","movieId").take(n) 
+    sorted_training_data=training.orderBy("userId","movieId").take(n)
+    op_df = sorted_training_data
     for i in sorted_training_data:
         print("adb:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
-        print("um : {0}".format(user_mean))
-        print("im:{0}".format(item_mean))
-        user_item_interaction = user_mean+ item_mean - i.rating
- 
-    return [];   
+        user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
+        op_df.withColumn("user_mean", lit(user_mean))
+        op_df.withColumn("item_mean", lit(item_mean))
+        op_df.withColumn("user_item_interaction", lit(user_item_interaction))
+    print("final:{0}".format(op_df.collect()))
+    return op_df.collect();   
 
 def als_with_bias_recommender(filename, seed):
     '''
