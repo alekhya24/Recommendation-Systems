@@ -190,9 +190,14 @@ def means_and_interaction(filename, seed, n):
     predictions = model.transform(test)
     evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
                                 predictionCol="prediction")'''
+    global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"}).collect()
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"}).collect()
-    '''all_user_mean=each_user_mean.agg({"avg(rating)":"mean"}).collect()'''
+    for i in training:
+        print("adb:{0}".format(i))
+        user_mean = each_user_mean.get(i.itemId)
+        item_mean = each_item_mean.get(i.itemId)
+        user_item_interaction = user_mean+ item_mean - i.rating
     print("each_user_mean:{0}".format(each_user_mean))
     print("each_item_mean:{0}".format(each_item_mean))
  
