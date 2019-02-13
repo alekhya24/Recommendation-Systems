@@ -220,7 +220,7 @@ def means_and_interaction(filename, seed, n):
         temp["user_item_interaction"] = user_item_interaction
         output = Row(**temp)'''
         final_df = final_df.union(temp_df)
-    print("final:{0}".format(final_df))
+    print("final:{0}".format(final_df.collect()))
     return final_df.collect();   
 
 def als_with_bias_recommender(filename, seed):
