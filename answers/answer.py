@@ -216,6 +216,7 @@ def means_and_interaction(filename, seed, n):
         temp["user_item_interaction"] = user_item_interaction
         output = Row(**temp)
         final_df = final_df.union(output)
+        final_df.createOrReplaceTempView("final_df")
         '''op_df = op_df.withColumn("user_mean", lit(user_mean))
         op_df = op_df.withColumn("item_mean", lit(item_mean))
         op_df = op_df.withColumn("user_item_interaction", lit(user_item_interaction))'''
