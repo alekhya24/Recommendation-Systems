@@ -194,16 +194,29 @@ def means_and_interaction(filename, seed, n):
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     op_df=training.orderBy("userId","movieId")
+    final_df = spark.createDataFrame([], schema=StructType([StructField('userId', StringType()),
+                                                         StructField('movieId', StringType()),
+                                                         StructField('rating', StringType()),
+                                                         StructField('user_mean', StringType()),
+                                                            StructField('item_mean', StringType()),
+                                                            StructField('user_item_interaction', StringType()),]))
     sorted_training_data =op_df.take(n)
     for i in sorted_training_data:
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
-        op_df = op_df.withColumn("user_mean", lit(user_mean))
+        temp = i.asDict()
+        #Do whatever you want to the dict. Like adding a new field or etc.
+        temp["user_mean"] = user_mean
+        temp["item_mean"] = item_mean
+        temp["user_item_interaction"] = user_item_interaction
+        output = Row(**temp)
+        final_df.union(output)
+        '''op_df = op_df.withColumn("user_mean", lit(user_mean))
         op_df = op_df.withColumn("item_mean", lit(item_mean))
-        op_df = op_df.withColumn("user_item_interaction", lit(user_item_interaction))
-    print("final:{0}".format(op_df.take(n)))
-    return op_df.take(n);   
+        op_df = op_df.withColumn("user_item_interaction", lit(user_item_interaction))'''
+    print("final:{0}".format(final_df.take(n)))
+    return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
     '''
