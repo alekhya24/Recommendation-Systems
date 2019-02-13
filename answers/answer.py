@@ -201,7 +201,7 @@ def means_and_interaction(filename, seed, n):
                                                          StructField('rating', StringType()),
                                                          StructField('user_mean', StringType()),
                                                             StructField('item_mean', StringType()),
-                                                            StructField('user_item_interaction', StringType()),]))
+                                                            StructField('user_item_interaction', StringType())]))
     sorted_training_data =op_df.take(n)
     for i in sorted_training_data:
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
