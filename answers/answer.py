@@ -214,6 +214,8 @@ def means_and_interaction(filename, seed, n):
         temp_df = spark.createDataFrame(l, schema)
         final_df = final_df.union(temp_df)
     print("final:{0}".format(final_df.take(n)))
+    print("user_mean:{0}".format(each_user_mean.collect()))
+    print("item_mean:{0}".format(each_item_mean.collect()))
     return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
