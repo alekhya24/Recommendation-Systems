@@ -195,7 +195,7 @@ def means_and_interaction(filename, seed, n):
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     print("each_user_mean:{0}".format(each_user_mean))
     print("each_item_mean:{0}".format(each_item_mean))
-    for i in training.collect().take(n):
+    for i in training:
         print("adb:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId'].like(i.userId)).select('avg(rating)')
         item_mean = each_item_mean.filter(each_item_mean['movieId'].like(i.movieId)).select('avg(rating)')
