@@ -10,6 +10,7 @@ from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.recommendation import ALS
 from pyspark.sql.types import StructField
 from pyspark.sql.types import StructType
+from pyspark.sql.types import StringType
 '''os.environ['HADOOP_HOME'] = "C:\\winutils"'''
 
 '''
