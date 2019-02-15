@@ -173,7 +173,7 @@ def means_and_interaction(filename, seed, n):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    op_df=training.orderBy("userId","movieId")
+    op_df=ratings.orderBy("userId","movieId")
     schema=StructType([StructField('userId', IntegerType()),
                                                          StructField('movieId', IntegerType()),
                                                          StructField('rating', FloatType()),
