@@ -224,7 +224,6 @@ def als_with_bias_recommender(filename, seed):
     final_df = spark.createDataFrame(sc.emptyRDD(), schema)
     l = []
     for i in sorted_training_data.collect():
-        print("i:{0}".format(i))
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
@@ -236,7 +235,7 @@ def als_with_bias_recommender(filename, seed):
     als.setSeed(seed)
     new_model= als.fit(final_df)    
     predictions = new_model.transform(test)
-    for i in predictions.collect():
+    for i in predictions.take(n):
             print(i)
     '''evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
