@@ -86,8 +86,8 @@ def basic_als_recommender(filename, seed):
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
-    (training, test) = ratings.randomSplit([0.8, 0.2])
-    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    (training, test) = ratings.randomSplit([0.8, 0.2],seed)
+    als = ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     model = als.fit(training)
     predictions = model.transform(test)
@@ -110,11 +110,7 @@ def global_average(filename, seed):
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
-    (training, test) = ratings.randomSplit([0.8, 0.2])
-    '''als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    als.setSeed(seed)
-    model = als.fit(training)
-    predictions = model.transform(test)'''
+    (training, test) = ratings.randomSplit([0.8, 0.2],seed)
     global_avg = training.agg({"rating": "mean"}).collect()[0][0]
     print("Global_avg:{0}".format(global_avg))
     return float(global_avg)
@@ -134,23 +130,13 @@ def global_average_recommender(filename, seed):
     ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
-    (training, test) = ratings.randomSplit([0.8, 0.2])
-    als = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    als.setSeed(seed)
-    model = als.fit(training)
-    predictions = model.transform(test)
-    global_avg = predictions.agg({"rating": "avg"}).collect()[0][0]
-    ratings_with_global_average = ratings.withColumn("average", lit(global_avg))
-    ratings_with_global_average.show()
-    (trainingWithAverage, testWithAverage) = ratings_with_global_average.randomSplit([0.8, 0.2])
-    alsWithAverage = ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="average",coldStartStrategy="drop")
-    alsWithAverage.setSeed(seed)
-    modelWithAverage = alsWithAverage.fit(trainingWithAverage)
-    predictionsWithAverage = modelWithAverage.transform(testWithAverage)
-    evaluator = RegressionEvaluator(metricName="rmse", labelCol="average",
+    (training, test) = ratings.randomSplit([0.8, 0.2],seed)
+    global_avg = training.agg({"rating": "avg"}).collect()[0][0]
+    training_with_global_average = training.withColumn("prediction", lit(global_avg))
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
-    rmse = evaluator.evaluate(predictionsWithAverage)
-    print("RMSE:{0}".format(rmse))
+    test_avg_RMSE = evaluator.evaluate(training_with_global_average)
+    print("RMSE:{0}".format(test_avg_RMSE))
     return rmse
         
 def means_and_interaction(filename, seed, n):
@@ -182,7 +168,7 @@ def means_and_interaction(filename, seed, n):
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
                                      rating=float(p[2])))
-    ratings =spark.createDataFrame(ratingsRDD.take(n).rdd)
+    ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2],seed)
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
@@ -234,7 +220,7 @@ def als_with_bias_recommender(filename, seed):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    op_df=training.orderBy("userId","movieId")
+    sorted_training_data=training.orderBy("userId","movieId")
     schema=StructType([StructField('userId', IntegerType()),
                                                          StructField('movieId', IntegerType()),
                                                          StructField('rating', FloatType()),
@@ -242,8 +228,7 @@ def als_with_bias_recommender(filename, seed):
                                                         StructField('item_mean', FloatType()),
                                                         StructField('user_item_interaction', FloatType())])
     final_df = spark.createDataFrame(sc.emptyRDD(), schema)
-    sorted_training_data =op_df
-    l = []
+    l = sc.emptyRDD()
     for i in sorted_training_data:
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
@@ -251,13 +236,18 @@ def als_with_bias_recommender(filename, seed):
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
         temp_df = spark.createDataFrame(l, schema)
         final_df = final_df.union(temp_df)
-    '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
+    (final_training,final_test) = final_df.randomSplit(0.8,0.2)
     als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    model= als.fit(final_df)
-    predictions = model.transform(test)
-    evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
+    model= als.fit(final_training)
+    predictions = model.transform(final_test)
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
-    print("RMSE:{0}".format(rmse))
-    return rmse
+
+
+    metrics = RegressionMetrics(scoreAndLabels)
+
+    # Root mean squared error
+    print("RMSE = %s" % metrics.rootMeanSquaredError)
+    return metrics.rootMeanSquaredError
