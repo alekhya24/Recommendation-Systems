@@ -193,7 +193,7 @@ def means_and_interaction(filename, seed, n):
     return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
-    '''
+    '''3
     This function must return the RMSE of recommendations obtained 
     using ALS + biases. Your ALS model should make predictions for *i*, 
     the user-item interaction, then you should recompute the predicted 
@@ -233,11 +233,10 @@ def als_with_bias_recommender(filename, seed):
     '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
     als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    new_model= als.fit(final_df)    
-    predictions = new_model.transform(test)
-    for i in predictions.take(4):
-            print(i)
-    '''evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
+    new_model= als.train(final_df)
+    predictions = model.predictAll(testData)
+    '''predictions = new_model.transform(test)
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
 
