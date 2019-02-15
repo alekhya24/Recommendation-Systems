@@ -235,15 +235,9 @@ def als_with_bias_recommender(filename, seed):
     als.setSeed(seed)
     new_model= als.fit(final_df)
     predictions = new_model.transform(test)
-    '''predictions = new_model.transform(test)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
-
-
-    metrics = RegressionMetrics(scoreAndLabels)
-
-    # Root mean squared error
-    print("RMSE = %s" % metrics.rootMeanSquaredError)
-    return metrics.rootMeanSquaredError'''
+    print("RMSE:{0}".format(rmse))
+    return rmse
     return 0
