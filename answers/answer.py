@@ -190,9 +190,9 @@ def means_and_interaction(filename, seed, n):
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
         temp_df = spark.createDataFrame(l, schema)
         final_df = final_df.union(temp_df)
-    for i in final_df.collect()
+    for i in final_df.take(n)
         print(i)
-    return final_df.collect();   
+    return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
     '''
