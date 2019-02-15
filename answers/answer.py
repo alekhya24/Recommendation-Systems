@@ -231,9 +231,8 @@ def als_with_bias_recommender(filename, seed):
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)
     '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
-    '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    als.setSeed(seed)'''
-    model = ALS.train(final_df, 70, 5, [0.01])
+    als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    als.setSeed(seed)
     new_model= als.train(final_df)
     predictions = model.predictAll(testData)
     '''predictions = new_model.transform(test)
