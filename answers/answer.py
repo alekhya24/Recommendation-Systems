@@ -188,8 +188,8 @@ def means_and_interaction(filename, seed, n):
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
-        temp_df = spark.createDataFrame(l, schema)
-        final_df = final_df.union(temp_df)
+    temp_df = spark.createDataFrame(l, schema)
+    final_df = final_df.union(temp_df)
     for i in final_df.collect():
         print(i)
     return final_df.take(n);   
