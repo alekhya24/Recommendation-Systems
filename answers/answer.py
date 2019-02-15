@@ -235,8 +235,8 @@ def als_with_bias_recommender(filename, seed):
     als.setSeed(seed)
     new_model= als.fit(final_df)    
     predictions = new_model.transform(test)
-    for i in predictions.take(4):
-            print(i)
+    '''for i in predictions.take(4):
+            print(i)'''
     '''evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
