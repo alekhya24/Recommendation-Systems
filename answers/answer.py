@@ -204,7 +204,7 @@ def als_with_bias_recommender(filename, seed):
     as before and be initialized with the random seed passed as 
     parameter. Test file: tests/test_als_with_bias_recommender.py
     '''
-    spark=init_spark()
+    '''spark=init_spark()
     lines = spark.read.text(filename).rdd
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
@@ -234,7 +234,7 @@ def als_with_bias_recommender(filename, seed):
     als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     new_model= als.fit(final_df)    
-    predictions = new_model.transform(test)
+    predictions = new_model.transform(test)'''
     '''for i in predictions.take(4):
             print(i)'''
     '''evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
