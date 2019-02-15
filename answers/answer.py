@@ -215,7 +215,7 @@ def als_with_bias_recommender(filename, seed):
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     sorted_training_data=training.orderBy("userId","movieId")
-    schema=StructType([StructField('userId', IntegerType()),
+    '''schema=StructType([StructField('userId', IntegerType()),
                                                          StructField('movieId', IntegerType()),
                                                          StructField('rating', FloatType()),
                                                          StructField('user_mean', FloatType()),
@@ -229,7 +229,7 @@ def als_with_bias_recommender(filename, seed):
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
     temp_df = spark.createDataFrame(l, schema)
-    '''final_df = final_df.union(temp_df)'''
+    final_df = final_df.union(temp_df)'''
     '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
     '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
