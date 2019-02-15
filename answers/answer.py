@@ -131,12 +131,12 @@ def global_average_recommender(filename, seed):
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2],seed)
-    global_avg = training.agg({"rating": "avg"}).collect()[0][0]
+    global_avg = training.agg({"rating": "mean"}).collect()[0][0]
     training_with_global_average = training.withColumn("prediction", lit(global_avg))
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     test_avg_RMSE = evaluator.evaluate(training_with_global_average)
-    print("RMSE:{0}".format(test_avg_RMSE))
+    print("RMSE through Global Average:{0}".format(test_avg_RMSE))
     return test_avg_RMSE
         
 def means_and_interaction(filename, seed, n):
