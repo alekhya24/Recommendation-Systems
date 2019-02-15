@@ -235,7 +235,7 @@ def als_with_bias_recommender(filename, seed):
     als.setSeed(seed)
     new_model= als.fit(final_df)
     predictions = new_model.transform(test)
-    evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
     print("RMSE:{0}".format(rmse))
