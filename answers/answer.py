@@ -190,8 +190,6 @@ def means_and_interaction(filename, seed, n):
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)
-    for i in final_df.collect():
-        print(i)
     return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
@@ -206,7 +204,7 @@ def als_with_bias_recommender(filename, seed):
     as before and be initialized with the random seed passed as 
     parameter. Test file: tests/test_als_with_bias_recommender.py
     '''
-    '''spark=init_spark()
+    spark=init_spark()
     lines = spark.read.text(filename).rdd
     parts = lines.map(lambda row: row.value.split("::"))
     ratingsRDD=parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]),
@@ -230,14 +228,16 @@ def als_with_bias_recommender(filename, seed):
         item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
-        temp_df = spark.createDataFrame(l, schema)
-        final_df = final_df.union(temp_df)
-    (final_training,final_test) = final_df.randomSplit(0.8,0.2)
+    temp_df = spark.createDataFrame(l, schema)
+    final_df = final_df.union(temp_df)
+    '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
     als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    model= als.fit(final_training)
-    predictions = model.transform(final_test)
-    evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
+    new_model= als.fit(final_df)    
+    predictions = new_model.transform(test)
+    for i in predictions.collect():
+            print(i)
+    '''evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
 
