@@ -233,7 +233,7 @@ def als_with_bias_recommender(filename, seed):
     '''(final_training,final_test) = final_df.randomSplit(0.8,0.2)'''
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    model = als.fit(training_df)
+    model = als.fit(final_df)
     predict_df = model.transform(test)
     data = predict_df.join(final_df).map(lambda tup: tup[1])
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
@@ -241,4 +241,3 @@ def als_with_bias_recommender(filename, seed):
     rmse = evaluator.evaluate(data)
     print("RMSE:{0}".format(rmse))
     return rmse
-    return 0
