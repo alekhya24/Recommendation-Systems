@@ -137,7 +137,7 @@ def global_average_recommender(filename, seed):
                                 predictionCol="prediction")
     test_avg_RMSE = evaluator.evaluate(training_with_global_average)
     print("RMSE:{0}".format(test_avg_RMSE))
-    return rmse
+    return test_avg_RMSE
         
 def means_and_interaction(filename, seed, n):
     '''
@@ -170,12 +170,6 @@ def means_and_interaction(filename, seed, n):
                                      rating=float(p[2])))
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2],seed)
-    '''als= ALS(rank=70,maxIter=5, regParam=0.01,seed=seed,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    als.setSeed(seed)
-    model= als.fit(training)
-    predictions = model.transform(test)
-    evaluator = RegressionEvaluator(metricName="mean", labelCol="rating",
-                                predictionCol="prediction")'''
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
