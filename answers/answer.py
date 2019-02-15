@@ -234,7 +234,7 @@ def als_with_bias_recommender(filename, seed):
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     new_model= als.fit(final_df)
-    predictions = model.predictAll(testData)
+    predictions = new_model.predictAll(testData)
     '''predictions = new_model.transform(test)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="user_item_interaction",
                                 predictionCol="prediction")
