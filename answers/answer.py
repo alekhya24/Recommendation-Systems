@@ -190,7 +190,7 @@ def means_and_interaction(filename, seed, n):
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)'''
-    renamed_user_mean = each_user_mean.selectExpr("userId as id")
+    renamed_user_mean = each_user_mean.withColumnRenamed("userId","id")
     training_with_means = op_df.join(renamed_user_mean,op_df["userId"]==renamed_user_mean["id"])
     '''training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,op_df['userId'])))
     .withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))
