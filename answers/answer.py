@@ -196,7 +196,7 @@ def means_and_interaction(filename, seed, n):
     .withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))
     final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
                                                                                                                       training_with_means.item_mean,global_mean)))'''
-    for i in training_with_means:
+    for i in training_with_means.collect():
         print(i)
     return final_df.take(n);   
 
