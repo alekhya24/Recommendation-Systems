@@ -192,14 +192,15 @@ def means_and_interaction(filename, seed, n):
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)'''
     renamed_user_mean = each_user_mean.withColumnRenamed("userId","uId").withColumnRenamed("avg(rating)","user_mean")
-    renamed_item_mean = each_item_mean.withColumnRenamed("userId","mId").withColumnRenamed("avg(rating)","item_mean")
+    renamed_item_mean = each_item_mean.withColumnRenamed("movieId","mId").withColumnRenamed("avg(rating)","item_mean")
     training_with_user_mean = training.join(renamed_user_mean,training['userId']==renamed_user_mean['uId'])
     training_with_item_mean = training_with_user_mean.join(renamed_item_mean,training_with_user_mean['userId']==renamed_item_mean['mId'])
     final_mean = training_with_item_mean.drop("uId","mId")
-    op_df = final_mean.orderBy("userId","movieId").take(n)
+    final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
+                                                                                                                      final_mean.item_mean,global_mean)))
+    op_df = final_df.orderBy("userId","movieId").take(n)
     '''training_with_means=training.withColumn("user_mean",lit(getUserMean(each_user_mean,op_df['userId']))).withColumn("item_mean",lit(getItemMean(each_item_mean,op_df['movieId'])))
-    final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
-                                                                                                                      training_with_means.item_mean,global_mean)))'''
+    '''
     for i in op_df:
         print(i)
     return op_df;   
