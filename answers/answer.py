@@ -224,7 +224,8 @@ def als_with_bias_recommender(filename, seed):
     final_df = spark.createDataFrame(sc.emptyRDD(), schema)
     l = []
     training_with_means=training.withColumn("user_mean",lit(getUserMean(each_user_mean,training['userId']))).withColumn("item_mean",lit(getItemMean(each_item_mean,training['movieId'])))
-    for i in training_with_means.take(3):
+    training_with_user_interaction = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means['rating'],training_with_means['user_mean'],training_with_means['item_mean'],global_mean)))
+    for i in training_with_user_interaction.take(3):
         print(i)
     '''for i in training.collect():
         user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
@@ -252,3 +253,7 @@ def getUserMean(user_mean,userId):
 def getItemMean(item_mean,movieId):
     item_mean_value =  item_mean.filter(item_mean['movieId']==movieId).select('avg(rating)').collect()[0][0]
     return item_mean_value
+
+def calculate_interaction(rating,user_mean,item_mean,global_mean)
+    user_item_interaction = rating - (user_mean+item_mean-global_mean)
+    return user_item_interaction
