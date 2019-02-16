@@ -174,7 +174,7 @@ def means_and_interaction(filename, seed, n):
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
     op_df=training.orderBy("userId","movieId")
-    schema=StructType([StructField('userId', IntegerType()),
+    '''schema=StructType([StructField('userId', IntegerType()),
                                                          StructField('movieId', IntegerType()),
                                                          StructField('rating', FloatType()),
                                                          StructField('user_mean', FloatType()),
@@ -189,7 +189,10 @@ def means_and_interaction(filename, seed, n):
         user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
     temp_df = spark.createDataFrame(l, schema)
-    final_df = final_df.union(temp_df)
+    final_df = final_df.union(temp_df)'''
+    training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,training.userId))).withColumn("item_mean",lit(getItemMean(each_item_mean,training.movieId)))
+    final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
+                                                                                                                      training_with_means.item_mean,global_mean)))
     return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
@@ -248,12 +251,10 @@ def als_with_bias_recommender(filename, seed):
     return 0
 
 def getUserMean(user_mean,userId):
-    print(userId)
     user_mean_value =  user_mean.filter(user_mean['userId']==userId).select('avg(rating)').collect()[0][0]
     return user_mean_value
 
 def getItemMean(item_mean,movieId):
-    print(movieId)
     item_mean_value =  item_mean.filter(item_mean['movieId']==movieId).select('avg(rating)').collect()[0][0]
     return item_mean_value
 
