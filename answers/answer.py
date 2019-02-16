@@ -94,7 +94,6 @@ def basic_als_recommender(filename, seed):
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(predictions)
-    print("RMSE:{0}".format(rmse))
     return rmse
 
 def global_average(filename, seed):
@@ -112,7 +111,6 @@ def global_average(filename, seed):
     ratings =spark.createDataFrame(ratingsRDD)
     (training, test) = ratings.randomSplit([0.8, 0.2],seed)
     global_avg = training.agg({"rating": "mean"}).collect()[0][0]
-    print("Global_avg:{0}".format(global_avg))
     return float(global_avg)
 
 def global_average_recommender(filename, seed):
@@ -136,7 +134,6 @@ def global_average_recommender(filename, seed):
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     test_avg_RMSE = evaluator.evaluate(test_with_global_average)
-    print("RMSE through Global Average:{0}".format(test_avg_RMSE))
     return test_avg_RMSE
         
 def means_and_interaction(filename, seed, n):
@@ -212,23 +209,19 @@ def als_with_bias_recommender(filename, seed):
     final_mean = training_with_item_mean.drop("uId","mId")
     final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
                                                                                                                       final_mean.item_mean,global_mean)))
-    final_df.show()
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="user_item_interaction",coldStartStrategy="drop")
     als.setSeed(seed)
     model = als.fit(final_df)
     predict_df = model.transform(test)
-    predict_df.show()
     test_with_user_mean = predict_df.join(renamed_user_mean,predict_df['userId']==renamed_user_mean['uId'])
     test_with_item_mean = test_with_user_mean.join(renamed_item_mean,test_with_user_mean['movieId']==renamed_item_mean['mId'])
     final_test_mean = test_with_item_mean.drop("uId","mId")
     final_test_df = final_test_mean.withColumn("predicted_rating",lit(calculate_predicted_rating(final_test_mean.prediction,final_test_mean.user_mean,
                                                                                                                       final_test_mean.item_mean,global_mean))) 
 
-    final_test_df.show()
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="predicted_rating")
     rmse = evaluator.evaluate(final_test_df)
-    print("RMSE:{0}".format(rmse))
     return rmse
 
 def calculate_interaction(rating,user_mean,item_mean,global_mean):
