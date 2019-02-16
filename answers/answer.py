@@ -191,7 +191,7 @@ def means_and_interaction(filename, seed, n):
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)'''
     
-    training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,userId)))
+    training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,'userId')))
     '''.withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))
     final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
                                                                                                                       training_with_means.item_mean,global_mean)))'''
