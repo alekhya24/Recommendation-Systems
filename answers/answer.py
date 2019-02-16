@@ -221,9 +221,10 @@ def als_with_bias_recommender(filename, seed):
     test_with_user_mean = predict_df.join(renamed_user_mean,predict_df['userId']==renamed_user_mean['uId'])
     test_with_item_mean = test_with_user_mean.join(renamed_item_mean,test_with_user_mean['movieId']==renamed_item_mean['mId'])
     final_test_mean = test_with_item_mean.drop("uId","mId")
-    final_test_df = final_mean.withColumn("predicted_rating",lit(calculate_predicted_rating(final_mean.prediction,final_mean.user_mean,
-                                                                                                                      final_mean.item_mean,global_mean))) 
+    final_test_df = final_test_mean.withColumn("predicted_rating",lit(calculate_predicted_rating(final_test_mean.prediction,final_test_mean.user_mean,
+                                                                                                                      final_test_mean.item_mean,global_mean))) 
 
+    final_test_df.show()
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="predicted_rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(final_test_df)
