@@ -173,24 +173,6 @@ def means_and_interaction(filename, seed, n):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    op_df=training
-    
-    '''schema=StructType([StructField('userId', IntegerType()),
-                                                         StructField('movieId', IntegerType()),
-                                                         StructField('rating', FloatType()),
-                                                         StructField('user_mean', FloatType()),
-                                                            StructField('item_mean', FloatType()),
-                                                            StructField('user_item_interaction', FloatType())])
-    final_df = spark.createDataFrame(sc.emptyRDD(), schema)
-    sorted_training_data =op_df.take(n)
-    l = []
-    for i in sorted_training_data:
-        user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
-        item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
-        user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
-        l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
-    temp_df = spark.createDataFrame(l, schema)
-    final_df = final_df.union(temp_df)'''
     renamed_user_mean = each_user_mean.withColumnRenamed("userId","uId").withColumnRenamed("avg(rating)","user_mean")
     renamed_item_mean = each_item_mean.withColumnRenamed("movieId","mId").withColumnRenamed("avg(rating)","item_mean")
     training_with_user_mean = training.join(renamed_user_mean,training['userId']==renamed_user_mean['uId'])
@@ -199,10 +181,6 @@ def means_and_interaction(filename, seed, n):
     final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
                                                                                                                       final_mean.item_mean,global_mean)))
     op_df = final_df.orderBy("userId","movieId").take(n)
-    '''training_with_means=training.withColumn("user_mean",lit(getUserMean(each_user_mean,op_df['userId']))).withColumn("item_mean",lit(getItemMean(each_item_mean,op_df['movieId'])))
-    '''
-    for i in op_df:
-        print(i)
     return op_df;   
 
 def als_with_bias_recommender(filename, seed):
@@ -227,51 +205,25 @@ def als_with_bias_recommender(filename, seed):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    sorted_training_data=training.orderBy("userId","movieId")
-    schema=StructType([StructField('userId', IntegerType()),
-                                                         StructField('movieId', IntegerType()),
-                                                         StructField('rating', FloatType()),
-                                                         StructField('user_mean', FloatType()),
-                                                        StructField('item_mean', FloatType()),
-                                                        StructField('user_item_interaction', FloatType())])
-    final_df = spark.createDataFrame(sc.emptyRDD(), schema)
-    l = []
-    training_with_means=training.withColumn("user_mean",lit(getUserMean(each_user_mean,training.userId))).withColumn("item_mean",lit(getItemMean(each_item_mean,training.movieId)))
-    training_with_user_interaction = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
-                                                                                                                      training_with_means.item_mean,global_mean)))
-    for i in training_with_means:
-        print(i)
-    '''for i in training.collect():
-        user_mean = each_user_mean.filter(each_user_mean['userId']==i.userId).select('avg(rating)').collect()[0][0]
-        item_mean = each_item_mean.filter(each_item_mean['movieId']==i.movieId).select('avg(rating)').collect()[0][0]
-        user_item_interaction =i.rating-(user_mean+ item_mean - global_mean)
-        l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
-    temp_df = spark.createDataFrame(l, schema)
-    final_df = final_df.union(temp_df)
-    (final_training,final_test) = final_df.randomSplit(0.8,0.2)
+    renamed_user_mean = each_user_mean.withColumnRenamed("userId","uId").withColumnRenamed("avg(rating)","user_mean")
+    renamed_item_mean = each_item_mean.withColumnRenamed("movieId","mId").withColumnRenamed("avg(rating)","item_mean")
+    training_with_user_mean = training.join(renamed_user_mean,training['userId']==renamed_user_mean['uId'])
+    training_with_item_mean = training_with_user_mean.join(renamed_item_mean,training_with_user_mean['movieId']==renamed_item_mean['mId'])
+    final_mean = training_with_item_mean.drop("uId","mId")
+    final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
+                                                                                                                      final_mean.item_mean,global_mean)))
+
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     model = als.fit(final_df)
     predict_df = model.transform(test)
+    
     data = predict_df.join(final_df).map(lambda tup: tup[1])
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(data)
-    print("RMSE:{0}".format(rmse))'''
+    print("RMSE:{0}".format(rmse))
     return 0
-
-def getUserMean(user_mean,userId):
-    print(userId)
-    test = user_mean.filter(user_mean['userId']==userId)
-    for i in test.collect():
-        print(i)
-    user_mean_value =  user_mean.filter(user_mean['userId']==userId).select('avg(rating)').collect()[0][0]
-    return user_mean_value
-
-def getItemMean(item_mean,movieId):
-    print("mid:{0}".format(movieId))
-    item_mean_value =  item_mean.filter(item_mean['movieId']==movieId).select('avg(rating)').collect()[0][0]
-    return item_mean_value
 
 def calculate_interaction(rating,user_mean,item_mean,global_mean):
     user_item_interaction = rating - (user_mean+item_mean-global_mean)
