@@ -215,7 +215,7 @@ def als_with_bias_recommender(filename, seed):
 
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    als.setPredictionCol("user_item_interaction")
+    '''als.setPredictionCol("user_item_interaction")'''
     model = als.fit(final_df)
     model.show()
     predict_df = model.transform(test)
