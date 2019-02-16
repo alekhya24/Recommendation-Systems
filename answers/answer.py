@@ -194,7 +194,7 @@ def means_and_interaction(filename, seed, n):
     renamed_user_mean = each_user_mean.withColumnRenamed("userId","uId").withColumnRenamed("avg(rating)","user_mean")
     renamed_item_mean = each_item_mean.withColumnRenamed("movieId","mId").withColumnRenamed("avg(rating)","item_mean")
     training_with_user_mean = training.join(renamed_user_mean,training['userId']==renamed_user_mean['uId'])
-    training_with_item_mean = training_with_user_mean.join(renamed_item_mean,training_with_user_mean['userId']==renamed_item_mean['mId'])
+    training_with_item_mean = training_with_user_mean.join(renamed_item_mean,training_with_user_mean['movieId']==renamed_item_mean['mId'])
     final_mean = training_with_item_mean.drop("uId","mId")
     final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
                                                                                                                       final_mean.item_mean,global_mean)))
