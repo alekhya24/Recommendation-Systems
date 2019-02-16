@@ -8,7 +8,6 @@ from pyspark.sql.functions import lit
 from pyspark.sql.functions import desc
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.recommendation import ALS
-from pyspark.mllib.recommendation import ALS
 from pyspark.sql.types import StructField
 from pyspark.sql.types import StructType
 from pyspark.sql.types import IntegerType
@@ -214,15 +213,13 @@ def als_with_bias_recommender(filename, seed):
     final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
                                                                                                                       final_mean.item_mean,global_mean)))
 
-    '''als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
-    als.setSeed(seed)'''
-    model = ALS.train(final_df, 70, 5)
-    predictions = model.predictAll(test)
-    predictions.show()
-    '''als.setPredictionCol("user_item_interaction")
+    als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
+    als.setSeed(seed)
+    als.setPredictionCol("user_item_interaction")
     model = als.fit(final_df)
+    model.show()
     predict_df = model.transform(test)
-    predict_df.show()'''
+    predict_df.show()
     '''data = predict_df.join(final_df)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
