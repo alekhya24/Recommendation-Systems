@@ -219,13 +219,22 @@ def als_with_bias_recommender(filename, seed):
     model = als.fit(final_df)
     predict_df = model.transform(test)
     predict_df.show()
-    '''data = predict_df.join(final_df)
-    evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
+    test_with_user_mean = predict_df.join(renamed_user_mean,predict_df['userId']==renamed_user_mean['uId'])
+    test_with_item_mean = test_with_user_mean.join(renamed_item_mean,test_with_user_mean['movieId']==renamed_item_mean['mId'])
+    final_test_mean = test_with_item_mean.drop("uId","mId")
+    final_test_df = final_mean.withColumn("predicted_rating",lit(calculate_predicted_rating(final_mean.prediction,final_mean.user_mean,
+                                                                                                                      final_mean.item_mean,global_mean))) 
+
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="predicted_rating",
                                 predictionCol="prediction")
-    rmse = evaluator.evaluate(data)
-    print("RMSE:{0}".format(rmse))'''
-    return 0
+    rmse = evaluator.evaluate(final_test_df)
+    print("RMSE:{0}".format(rmse))
+    return rmse
 
 def calculate_interaction(rating,user_mean,item_mean,global_mean):
     user_item_interaction = rating - (user_mean+item_mean-global_mean)
     return user_item_interaction
+
+def calculate_predicted_rating(prediction,user_mean,item_mean,global_mean)
+    predicted_rating = prediction + user_mean + item_mean - global_mean
+    return predicted_rating
