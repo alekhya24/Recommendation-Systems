@@ -212,12 +212,11 @@ def als_with_bias_recommender(filename, seed):
     final_mean = training_with_item_mean.drop("uId","mId")
     final_df = final_mean.withColumn("user_item_interaction",lit(calculate_interaction(final_mean.rating,final_mean.user_mean,
                                                                                                                       final_mean.item_mean,global_mean)))
-
+    final_df.show()
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
     '''als.setPredictionCol("user_item_interaction")'''
     model = als.fit(final_df)
-    model.show()
     predict_df = model.transform(test)
     predict_df.show()
     '''data = predict_df.join(final_df)
