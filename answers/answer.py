@@ -254,6 +254,6 @@ def getItemMean(item_mean,movieId):
     item_mean_value =  item_mean.filter(item_mean['movieId']==movieId).select('avg(rating)').collect()[0][0]
     return item_mean_value
 
-def calculate_interaction(rating,user_mean,item_mean,global_mean)
+def calculate_interaction(rating,user_mean,item_mean,global_mean):
     user_item_interaction = rating - (user_mean+item_mean-global_mean)
     return user_item_interaction
