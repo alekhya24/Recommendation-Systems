@@ -190,12 +190,13 @@ def means_and_interaction(filename, seed, n):
         l = l + [([i.userId,i.movieId,i.rating,user_mean,item_mean,user_item_interaction])]
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)'''
-    training_with_means=op_df.withColumn("user_mean",lit(each_user_mean.filter(each_user_mean.userId==op_df.userId).select('avg(rating)').collect()[0][0])).withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))
-    final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
-                                                                                                                      training_with_means.item_mean,global_mean)))
-    for i in final_df.take(n):
+    training_with_means=op_df.withColumn("user_mean",lit(each_user_mean.filter(each_user_mean.userId==op_df.userId).select('avg(rating)').collect()[0][0]))
+    '''.withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))'''
+    '''final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
+                                                                                                                      training_with_means.item_mean,global_mean)))'''
+    for i in training_with_means.take(n):
         print(i)
-    return final_df.take(n);   
+    return training_with_means.take(n);   
 
 def als_with_bias_recommender(filename, seed):
     '''3
