@@ -215,14 +215,15 @@ def als_with_bias_recommender(filename, seed):
 
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
+    als.setPredictionCol("user_item_interaction")
     model = als.fit(final_df)
     predict_df = model.transform(test)
     predict_df.show()
-    data = predict_df.join(final_df)
+    '''data = predict_df.join(final_df)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
                                 predictionCol="prediction")
     rmse = evaluator.evaluate(data)
-    print("RMSE:{0}".format(rmse))
+    print("RMSE:{0}".format(rmse))'''
     return 0
 
 def calculate_interaction(rating,user_mean,item_mean,global_mean):
