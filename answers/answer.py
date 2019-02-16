@@ -215,7 +215,6 @@ def als_with_bias_recommender(filename, seed):
     final_df.show()
     als= ALS(rank=70,maxIter=5, regParam=0.01,userCol="userId", itemCol="movieId", ratingCol="rating",coldStartStrategy="drop")
     als.setSeed(seed)
-    '''als.setPredictionCol("user_item_interaction")'''
     model = als.fit(final_df)
     predict_df = model.transform(test)
     predict_df.show()
@@ -235,6 +234,6 @@ def calculate_interaction(rating,user_mean,item_mean,global_mean):
     user_item_interaction = rating - (user_mean+item_mean-global_mean)
     return user_item_interaction
 
-def calculate_predicted_rating(prediction,user_mean,item_mean,global_mean)
+def calculate_predicted_rating(prediction,user_mean,item_mean,global_mean):
     predicted_rating = prediction + user_mean + item_mean - global_mean
     return predicted_rating
