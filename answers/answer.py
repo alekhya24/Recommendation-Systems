@@ -193,6 +193,8 @@ def means_and_interaction(filename, seed, n):
     training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,training.userId))).withColumn("item_mean",lit(getItemMean(each_item_mean,training.movieId)))
     final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
                                                                                                                       training_with_means.item_mean,global_mean)))
+    for i in final_df.take(n):
+        print(i)
     return final_df.take(n);   
 
 def als_with_bias_recommender(filename, seed):
