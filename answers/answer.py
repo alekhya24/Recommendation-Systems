@@ -173,7 +173,8 @@ def means_and_interaction(filename, seed, n):
     global_mean = training.agg({"rating": "mean"}).collect()[0][0]
     each_user_mean = training.groupBy("userId").agg({"rating":"mean"})
     each_item_mean = training.groupBy("movieId").agg({"rating":"mean"})
-    op_df=training.orderBy("userId","movieId")
+    op_df=training
+    
     '''schema=StructType([StructField('userId', IntegerType()),
                                                          StructField('movieId', IntegerType()),
                                                          StructField('rating', FloatType()),
@@ -191,14 +192,15 @@ def means_and_interaction(filename, seed, n):
     temp_df = spark.createDataFrame(l, schema)
     final_df = final_df.union(temp_df)'''
     renamed_user_mean = each_user_mean.withColumnRenamed("userId","id")
-    training_with_means = op_df.join(renamed_user_mean,op_df['userId']==renamed_user_mean['id'],'inner')
-    '''training_with_means=op_df.withColumn("user_mean",lit(getUserMean(each_user_mean,op_df['userId'])))
-    .withColumn("item_mean",lit(getItemMean(each_item_mean,op_df.movieId)))
+    '''training_with_means = training.join(renamed_user_mean,training['userId']==renamed_user_mean['id'])
+    op_df = training_with_means.orderBy("userId","movieId").take(n)'''
+    training_with_means=training.withColumn("user_mean",lit(getUserMean(each_user_mean,op_df['userId']))).withColumn("item_mean",lit(getItemMean(each_item_mean,op_df['movieId'])))
     final_df = training_with_means.withColumn("user_item_interaction",lit(calculate_interaction(training_with_means.rating,training_with_means.user_mean,
-                                                                                                                      training_with_means.item_mean,global_mean)))'''
-    for i in training_with_means.collect():
+                                                                                                                      training_with_means.item_mean,global_mean)))
+    op_df = final_df.orderBy("userId","movieId").take(n)
+    for i in op_df:
         print(i)
-    return final_df.take(n);   
+    return op_df;   
 
 def als_with_bias_recommender(filename, seed):
     '''
