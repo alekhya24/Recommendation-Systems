@@ -253,10 +253,12 @@ def als_with_bias_recommender(filename, seed):
     return 0
 
 def getUserMean(user_mean,userId):
+    print("uid:{0}".format(userId))
     user_mean_value =  user_mean.filter(user_mean['userId']==userId).select('avg(rating)').collect()[0][0]
     return user_mean_value
 
 def getItemMean(item_mean,movieId):
+    print("mid:{0}".format(movieId))
     item_mean_value =  item_mean.filter(item_mean['movieId']==movieId).select('avg(rating)').collect()[0][0]
     return item_mean_value
 
