@@ -225,8 +225,8 @@ def als_with_bias_recommender(filename, seed):
                                                                                                                       final_test_mean.item_mean,global_mean))) 
 
     final_test_df.show()
-    evaluator = RegressionEvaluator(metricName="rmse", labelCol="predicted_rating",
-                                predictionCol="prediction")
+    evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating",
+                                predictionCol="predicted_rating")
     rmse = evaluator.evaluate(final_test_df)
     print("RMSE:{0}".format(rmse))
     return rmse
